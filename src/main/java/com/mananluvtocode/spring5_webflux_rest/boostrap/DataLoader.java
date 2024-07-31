@@ -19,8 +19,8 @@ public class DataLoader implements CommandLineRunner {
 
     @Override
     public void run(String... args) throws Exception {
-        loadVendor();
-        loadCategory();
+//        loadVendor();
+//        loadCategory();
         System.out.println("Category loaded successfully:- " + categoryRepository.count().block());
         System.out.println("Vendor loaded successfully:- " + vendorRepository.count().block());
     }
