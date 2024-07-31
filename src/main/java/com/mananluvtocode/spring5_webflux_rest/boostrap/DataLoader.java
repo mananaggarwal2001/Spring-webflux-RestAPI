@@ -19,17 +19,8 @@ public class DataLoader implements CommandLineRunner {
 
     @Override
     public void run(String... args) throws Exception {
-        try {
-            if (categoryRepository.count().block() == null) {
-                loadCategory();
-            }
-            if (vendorRepository.count().block() == null) {
-                loadVendor();
-            }
-        } catch (Exception e) {
-            e.printStackTrace();
-            throw new RuntimeException("Error loading data");
-        }
+        loadVendor();
+        loadCategory();
         System.out.println("Category loaded successfully:- " + categoryRepository.count().block());
         System.out.println("Vendor loaded successfully:- " + vendorRepository.count().block());
     }
