@@ -1,15 +1,21 @@
 package com.mananluvtocode.spring5_webflux_rest.controller;
+
 import com.mananluvtocode.spring5_webflux_rest.domain.Vendor;
 import com.mananluvtocode.spring5_webflux_rest.repositoriees.VendorRepository;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.BDDMockito;
 import org.mockito.Mockito;
+import org.reactivestreams.Publisher;
 import org.springframework.test.web.reactive.server.EntityExchangeResult;
+import org.springframework.test.web.reactive.server.FluxExchangeResult;
 import org.springframework.test.web.reactive.server.WebTestClient;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
+
 import java.util.List;
+
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
 
 class VendorControllerTest {
@@ -55,5 +61,20 @@ class VendorControllerTest {
                 .expectBody(Vendor.class)
                 .returnResult();
         System.out.println(vendorMono.getResponseBody());
+    }
+
+    @Test
+    void testCreateNewVendor() {
+        BDDMockito.given(vendorRepository
+                        .saveAll((Publisher<Vendor>) any()))
+                .willReturn(Flux.just(Vendor.builder().build()));
+        Mono<Vendor> vendorMock = Mono.just(Vendor.builder().firstName("New").lastName("Vendor").build());
+        FluxExchangeResult<Vendor> vendorFluxExchangeResult = webTestClient.post().uri("/api/v1/vendors")
+                .body(vendorMock, Vendor.class)
+                .exchange()
+                .expectStatus()
+                .isCreated()
+                .returnResult(Vendor.class);
+        System.out.println(vendorFluxExchangeResult.getResponseBody().blockFirst());
     }
 }
