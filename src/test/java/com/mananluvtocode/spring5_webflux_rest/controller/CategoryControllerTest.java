@@ -1,21 +1,19 @@
 package com.mananluvtocode.spring5_webflux_rest.controller;
-
 import com.mananluvtocode.spring5_webflux_rest.domain.Category;
 import com.mananluvtocode.spring5_webflux_rest.repositoriees.CategoryRepository;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.mockito.BDDMockito;
 import org.mockito.Mockito;
 import org.reactivestreams.Publisher;
 import org.springframework.test.web.reactive.server.FluxExchangeResult;
 import org.springframework.test.web.reactive.server.WebTestClient;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
-
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.BDDMockito.given;
 import static org.mockito.Mockito.verify;
+
 
 class CategoryControllerTest {
     WebTestClient webTestClient;
@@ -86,13 +84,29 @@ class CategoryControllerTest {
     }
 
     @Test
-    void testPatchUpdateCategory() {
+    void testPatchUpdateCategoryWithChanges() {
         // this is producing the null pointer exception error now we will do one thing that we will use the method which is findbyId for gurantee that this will return the object.
         given(categoryRepository.findById(anyString()))
-                .willReturn(Mono.just(Category.builder().build()));
+                .willReturn(Mono.just(Category.builder().description("old description").build()));
         given(categoryRepository.save(any(Category.class)))
                 .willReturn(Mono.just(Category.builder().build()));
-        Mono<Category> updatedCategory = Mono.just(Category.builder().id("newid").description("this is new description").build());
+        Mono<Category> updatedCategory = Mono.just(Category.builder().description("this is new description").build());
+
+        webTestClient.patch().uri("/api/v1/categories/newid")
+                .body(updatedCategory, Category.class)
+                .exchange().expectStatus().isOk();
+
+        verify(categoryRepository).save(any(Category.class));
+    }
+
+    @Test
+    void testPatchUpdateCategoryWithoutChanges() {
+        // this is producing the null pointer exception error now we will do one thing that we will use the method which is findbyId for gurantee that this will return the object.
+        given(categoryRepository.findById(anyString()))
+                .willReturn(Mono.just(Category.builder().description("old description").build()));
+        given(categoryRepository.save(any(Category.class)))
+                .willReturn(Mono.just(Category.builder().build()));
+        Mono<Category> updatedCategory = Mono.just(Category.builder().description("old description").build());
 
         webTestClient.patch().uri("/api/v1/categories/newid")
                 .body(updatedCategory, Category.class)

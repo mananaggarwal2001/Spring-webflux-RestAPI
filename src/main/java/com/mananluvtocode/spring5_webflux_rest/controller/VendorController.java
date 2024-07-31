@@ -1,5 +1,4 @@
 package com.mananluvtocode.spring5_webflux_rest.controller;
-
 import com.mananluvtocode.spring5_webflux_rest.domain.Vendor;
 import com.mananluvtocode.spring5_webflux_rest.repositoriees.VendorRepository;
 import org.reactivestreams.Publisher;
@@ -39,5 +38,21 @@ public class VendorController {
     public Mono<Vendor> updateVendorById(@PathVariable String id, @RequestBody Vendor vendorPublisher) {
         vendorPublisher.setId(id);
         return vendorRepository.save(vendorPublisher);
+    }
+
+    @PatchMapping("/api/v1/vendors/{id}")
+    @ResponseStatus(HttpStatus.OK)
+    public Mono<Vendor> patchVendorById(@PathVariable String id, @RequestBody Vendor vendorPublisher) {
+        Mono<Vendor> vendor = vendorRepository.findById(id).flatMap(element -> {
+            System.out.println(element);
+            if (!element.getFirstName().equals(vendorPublisher.getFirstName())) {
+                element.setFirstName(vendorPublisher.getFirstName());
+            }
+            if (!element.getLastName().equals(vendorPublisher.getLastName())) {
+                element.setLastName(vendorPublisher.getLastName());
+            }
+            return vendorRepository.save(element);
+        });
+        return vendor;
     }
 }

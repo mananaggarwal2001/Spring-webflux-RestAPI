@@ -17,6 +17,7 @@ import java.util.List;
 
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.Mockito.verify;
 
 class VendorControllerTest {
     VendorController vendorController;
@@ -90,6 +91,32 @@ class VendorControllerTest {
                 .returnResult();
         System.out.println(vendorResult.getResponseBody());
 
-        BDDMockito.verify(vendorRepository).save(any(Vendor.class));
+        verify(vendorRepository).save(any(Vendor.class));
+    }
+
+    @Test
+    void testPatchVendorByIdWithChanges() {
+        BDDMockito.given(vendorRepository.findById(anyString())).willReturn(Mono.just(Vendor.builder().firstName("Man").build()));
+        BDDMockito.given(vendorRepository.save(any(Vendor.class))).willReturn(Mono.just(Vendor.builder().build()));
+        Mono<Vendor> vendorMono = Mono.just(Vendor.builder().firstName("Manan").build());
+
+        webTestClient.put().uri("/api/v1/vendors/givenName").body(vendorMono, Vendor.class)
+                .exchange()
+                .expectStatus().isOk();
+
+        verify(vendorRepository).save(any(Vendor.class));
+    }
+
+    @Test
+    void testPatchVendorByIdWithoutChanges() {
+        BDDMockito.given(vendorRepository.findById(anyString())).willReturn(Mono.just(Vendor.builder().firstName("Manan").build()));
+        BDDMockito.given(vendorRepository.save(any(Vendor.class))).willReturn(Mono.just(Vendor.builder().build()));
+        Mono<Vendor> vendorMono = Mono.just(Vendor.builder().firstName("Manan").build());
+
+        webTestClient.put().uri("/api/v1/vendors/givenName").body(vendorMono, Vendor.class)
+                .exchange()
+                .expectStatus().isOk();
+
+        verify(vendorRepository).save(any(Vendor.class));
     }
 }
