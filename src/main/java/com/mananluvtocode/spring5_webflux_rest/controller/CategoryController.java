@@ -40,4 +40,16 @@ public class CategoryController {
         category.setId(id);
         return categoryRepository.save(category);
     }
+
+    // Patch is used for partially update the resource for doing the further work.
+    @PatchMapping("/api/v1/categories/{id}")
+    @ResponseStatus(HttpStatus.OK)
+    Mono<Category> patchCategory(@RequestBody Category category, @PathVariable String id) {
+        return categoryRepository.findById(id).flatMap(result -> {
+            if (!result.getDescription().equals(category.getDescription())) {
+                result.setDescription(category.getDescription());
+            }
+            return categoryRepository.save(result);
+        });
+    }
 }

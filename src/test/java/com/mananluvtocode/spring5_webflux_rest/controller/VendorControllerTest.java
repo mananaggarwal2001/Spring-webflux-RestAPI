@@ -66,7 +66,7 @@ class VendorControllerTest {
     @Test
     void testCreateNewVendor() {
         BDDMockito.given(vendorRepository
-                        .saveAll((Publisher<Vendor>) any()))
+                        .saveAll(any(Publisher.class)))
                 .willReturn(Flux.just(Vendor.builder().build()));
         Mono<Vendor> vendorMock = Mono.just(Vendor.builder().firstName("New").lastName("Vendor").build());
         FluxExchangeResult<Vendor> vendorFluxExchangeResult = webTestClient.post().uri("/api/v1/vendors")
@@ -76,5 +76,20 @@ class VendorControllerTest {
                 .isCreated()
                 .returnResult(Vendor.class);
         System.out.println(vendorFluxExchangeResult.getResponseBody().blockFirst());
+    }
+
+    @Test
+    void testUpdateVendorById() {
+        BDDMockito.given(vendorRepository.save(any(Vendor.class))).willReturn(Mono.just(Vendor.builder().build()));
+        Mono<Vendor> vendorMono = Mono.just(Vendor.builder().firstName("This is my new vendor").build());
+        EntityExchangeResult<Vendor> vendorResult = webTestClient.put().uri("/api/v1/vendors/givenName")
+                .body(vendorMono, Vendor.class)
+                .exchange()
+                .expectStatus().isOk()
+                .expectBody(Vendor.class)
+                .returnResult();
+        System.out.println(vendorResult.getResponseBody());
+
+        BDDMockito.verify(vendorRepository).save(any(Vendor.class));
     }
 }
