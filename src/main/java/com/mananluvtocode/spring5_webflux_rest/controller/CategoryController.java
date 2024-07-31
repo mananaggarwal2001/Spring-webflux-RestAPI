@@ -33,4 +33,11 @@ public class CategoryController {
     Mono<Void> createNewCategory(@RequestBody Publisher<Category> category) {
         return categoryRepository.saveAll(category).then();
     }
+
+    @PutMapping("/api/v1/categories/{id}")
+    @ResponseStatus(HttpStatus.OK)
+    Mono<Category> updateCategory(@RequestBody Category category, @PathVariable String id) {
+        category.setId(id);
+        return categoryRepository.save(category);
+    }
 }

@@ -1,5 +1,4 @@
 package com.mananluvtocode.spring5_webflux_rest.controller;
-
 import com.mananluvtocode.spring5_webflux_rest.domain.Category;
 import com.mananluvtocode.spring5_webflux_rest.repositoriees.CategoryRepository;
 import org.junit.jupiter.api.BeforeEach;
@@ -11,8 +10,6 @@ import org.springframework.test.web.reactive.server.FluxExchangeResult;
 import org.springframework.test.web.reactive.server.WebTestClient;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
-
-import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
 
@@ -71,5 +68,16 @@ class CategoryControllerTest {
                 .isCreated()
                 .returnResult(Category.class);
         System.out.println(categoryFlux.getResponseBody().blockFirst());
+    }
+
+    @Test
+    void testUpdateCategory() {
+        BDDMockito.given(categoryRepository.save(any(Category.class))).willReturn(Mono.just(Category.builder().build()));
+        Mono<Category> updatedCategory = Mono.just(Category.builder().id("newid").description("This is new Category").build());
+
+        FluxExchangeResult<Category> categoryMonoReturnResult = webTestClient.put().uri("/api/v1/categories/newid")
+                .body(updatedCategory, Category.class)
+                .exchange().expectStatus().isOk().returnResult(Category.class);
+        System.out.println(categoryMonoReturnResult.getResponseBody().then().block());
     }
 }
